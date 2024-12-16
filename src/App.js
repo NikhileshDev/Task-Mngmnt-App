@@ -1,14 +1,14 @@
-import logo from './logo.svg';
+
 import './App.css';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Task Management App</h1>
-        <img src={logo} className="App-logo" alt="logo" />
-       
-      </header>
+    <div className='main'>
+      <h1>Task Management App</h1>
+      <div className="App">
+      
+      <div className='center'>Task 1  </div>
+    </div>
     </div>
   );
 }
