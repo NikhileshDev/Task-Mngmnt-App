@@ -76,28 +76,66 @@ const App = () => {
             <Breadcrumb.Item>App</Breadcrumb.Item>
           </Breadcrumb>
 
-          <Space direction='vertical'>
-            <Search
-              placeholder='input search text'
-              enterButton='Search'
-              onSearch={onSearch}
-              size='large'
-            />
-          </Space>
 
-          <Dropdown
-            menu={{
-              items,
-            }}
-          >
-            <a onClick={(e) => e.preventDefault()}>
-              <Space>
-                <Button type='primary'>
-                  Select<DownOutlined />
-                </Button>
+          <Row>
+            <Col
+              xs={{
+                span: 5,
+                offset: 1,
+              }}
+              lg={{
+                span: 6,
+                offset: 2,
+              }}
+            >
+
+            </Col>
+            <Col
+              xs={{
+                span: 11,
+                offset: 1,
+              }}
+              lg={{
+                span: 6,
+                offset: 2,
+              }}
+            >
+              <Space direction='vertical'>
+                <Search
+                  placeholder='input search text'
+                  enterButton='Search'
+                  onSearch={onSearch}
+                  size='large'
+                />
               </Space>
-            </a>
-          </Dropdown>
+            </Col>
+            <Col
+              xs={{
+                span: 5,
+                offset: 1,
+              }}
+              lg={{
+                span: 6,
+                offset: 2,
+              }}
+            >
+              <Dropdown
+                menu={{
+                  items,
+                }}
+              >
+                <a onClick={(e) => e.preventDefault()}>
+                  <Space>
+                    <Button type='primary'>
+                      Select<DownOutlined />
+                    </Button>
+                  </Space>
+                </a>
+              </Dropdown>
+            </Col>
+          </Row>
+
+
           <div
             style={{
               background: colorBgContainer,
