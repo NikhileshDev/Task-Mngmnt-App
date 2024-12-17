@@ -3,7 +3,7 @@ import './App.css';
 
 function App() {
   return (
-    <div className='main'>
+    <div className='main' style={{minHeight:window.innerHeight, maxHeight:window.innerHeight}}>
       <h1>Task Management App</h1>
       <div className="App">
       

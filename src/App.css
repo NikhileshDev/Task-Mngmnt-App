@@ -1,14 +1,33 @@
+html, body, body div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp, small, strong, sub, sup, var, b, i, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, figure, footer, header, hgroup, menu, nav, section, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: transparent;
+}
+
+body{
+  overflow: hidden;
+}
+
+
 .main {
   text-align: center;
   background-color: #d9d9d9;
   padding: 30px;
+  font-size: 30px;
 }
 
 .App {
-  min-height: 100vh;
+  min-height: 80vh;
   display: flex;
   justify-content: center;
   padding: 30px;
+  margin: 0;
+  overflow: hidden;
+  
 
 }
 
