@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Input, Space, Button, Row, Col, Breadcrumb, Layout, theme, Dropdown } from 'antd';
+import React, { useState } from 'react';
+import { Input, Space, Button, Row, Col, Breadcrumb, Layout, theme, Dropdown, List } from 'antd';
 import { FormOutlined, DownOutlined } from '@ant-design/icons';
 import './App.css';
 import { } from 'antd';
@@ -9,68 +9,38 @@ const { Search } = Input;
 const onSearch = (value, _e, info) => console.log(info?.source, value);
 
 const items = [
-  {
-    key: '1',
-    label: (
-      <a target="_blank" rel="noopener noreferrer" >
-        ALL
-      </a>
-    ),
-  },
-
-  {
-    key: '2',
-    label: (
-      <a target="_blank" rel="noopener noreferrer" >
-        Active
-      </a>
-    ),
-  },
-
-  {
-    key: '3',
-    label: (
-      <a target="_blank" rel="noopener noreferrer" >
-        Completed
-      </a>
-    ),
-    disabled: true,
-  },
+  { key: '1', label: 'All' , disabled: true },
+  { key: '2', label: 'Active' },
+  { key: '3', label: 'Completed' },
 ];
 
 
 const App = () => {
-  const [tasks, setTasks] = useState();
-  const [newTask, setNewTask] = useState();
+
+  const [tasks, setTasks] = useState([]);
+  const [newTask, setNewTask] = useState('');
 
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const addTask = () => { }
+  const addTask = () => {
+    if(!newTask.trim()) return;
+    setTasks([...tasks, { id: Date.now(), text: newTask, completed: false}]);
+    setNewTask('');
+  };
+
+
   return (
     <div className='main-div'>
 
       <Layout>
-        <Header
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-
-
+        <Header className = 'header' >
+          Task Management App
         </Header>
-        <Content
-          style={{
-            padding: '0 48px',
-          }}
-        >
-          <Breadcrumb
-            style={{
-              margin: '16px 0',
-            }}
-          >
+        
+        <Content style={{ padding: '0 48px' }} >
+          <Breadcrumb style={{ margin: '16px 0' }} >
             <Breadcrumb.Item>Home</Breadcrumb.Item>
             <Breadcrumb.Item>List</Breadcrumb.Item>
             <Breadcrumb.Item>App</Breadcrumb.Item>
@@ -79,62 +49,47 @@ const App = () => {
 
           <Row>
             <Col
-              xs={{
-                span: 5,
-                offset: 1,
-              }}
-              lg={{
-                span: 6,
-                offset: 2,
-              }}
+              xs={{ span: 5, offset: 1 }}
+              lg={{ span: 6, offset: 2 }}
             >
 
             </Col>
             <Col
-              xs={{
-                span: 11,
-                offset: 1,
-              }}
-              lg={{
-                span: 6,
-                offset: 2,
-              }}
+              xs={{ span: 11, offset: 1 }}
+              lg={{ span: 6, offset: 2 }}
             >
-              <Space direction='vertical'>
-                <Search
-                  placeholder='input search text'
-                  enterButton='Search'
-                  onSearch={onSearch}
-                  size='large'
-                />
-              </Space>
+                <Space direction='vertical'>
+                  <input
+                    value = {newTask}
+                    onChange={(e) => setNewTask(e.target.value)}
+                    placeholder = 'Enter Task'
+                  />
+                  <Button type='primary' onClick={addTask}> Add </Button> 
+                  <Search
+                    placeholder='input search text'
+                    enterButton='Search'
+                    onSearch={onSearch}
+                    size='large'
+                  />
+                </Space>  
             </Col>
             <Col
-              xs={{
-                span: 5,
-                offset: 1,
-              }}
-              lg={{
-                span: 6,
-                offset: 2,
-              }}
+              xs={{ span: 5, offset: 1 }}
+              lg={{ span: 6, offset: 2 }}
             >
               <Dropdown
-                menu={{
-                  items,
-                }}
+                menu = {{ items }}
               >
                 <a onClick={(e) => e.preventDefault()}>
                   <Space>
                     <Button type='primary'>
-                      Select<DownOutlined />
+                      Status <DownOutlined />
                     </Button>
                   </Space>
                 </a>
               </Dropdown>
             </Col>
           </Row>
-
 
           <div
             style={{
@@ -145,15 +100,22 @@ const App = () => {
               marginTop: 10
             }}
           >
-            Tasks <FormOutlined />
+            <h2>  Tasks <FormOutlined /> </h2>
+            <List
+             bordered
+             dataSource = {tasks}
+             renderItem={(task) => {
+               <List.Item>
+                 <div> {task.text} </div>
+               </List.Item>
+              }}
+            />  
           </div>
+        
         </Content>
-        <Footer
-          style={{
-            textAlign: 'center',
-          }}
-        >
-          An Design ©{new Date().getFullYear()}
+
+        <Footer style = {{ textAlign: 'center' }} >
+          A&T Design ©{new Date().getFullYear()}
         </Footer>
       </Layout>
     </div>
@@ -161,3 +123,4 @@ const App = () => {
 };
 
 export default App;
+

@@ -2,6 +2,13 @@
   text-align: center;
 }
 
+.header {
+  display: flex;
+  justify-content: center;
+  color: antiquewhite;
+  font-size: 35px;
+}
+
 .container {
   margin: auto;
   margin-top: 20px;
@@ -10,9 +17,4 @@
   padding: 10px;
   min-height: 60vh;
   background-color: rgb(255, 249, 249);
-}
-
-.btn {
-  background-color: blue;
-  color: white;
 }
