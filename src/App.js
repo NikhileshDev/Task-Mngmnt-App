@@ -20,48 +20,48 @@ const App = () => {
   const [editingTask, setEditingTask] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Form instance for editing task modal
+
   const [form] = Form.useForm();
 
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  // Add a new task
+ 
   const addTask = () => {
-    // Validate the newTask input and make sure it is not empty
+    // Validate and make sure input is not empty
     if (!newTask.trim()) {
       message.error('Please enter a task name!');
       return;
     }
 
     setTasks([...tasks, { id: Date.now(), text: newTask, completed: false, description: '', dueDate: null }]);
-    setNewTask(''); // Reset the input after adding the task
+    setNewTask('');  // Reset the input after adding the task
   };
 
-  // Toggle task completion
+
   const toggleTaskCompletion = (id) => {
     setTasks(tasks.map((task) => task.id === id ? { ...task, completed: !task.completed } : task));
   };
 
-  // Remove a task
+ 
   const removeTask = (id) => {
     setTasks(tasks.filter((task) => task.id !== id));
   };
 
-  // Handle task category filter
+ 
   const handleCategoryChange = ({ key }) => {
     setSelectedCategory(key);
   };
 
-  // Edit a task (open modal)
+  // Open modal to edit a task
   const editTask = (task) => {
     setEditingTask(task);
-    form.setFieldsValue(task); // Set values for the form fields
+    form.setFieldsValue(task); 
     setModalVisible(true);
   };
 
-  // Save edited task
+  
   const saveEditedTask = (values) => {
     const updatedTasks = tasks.map((task) =>
       task.id === editingTask.id ? { ...task, ...values } : task
@@ -72,12 +72,22 @@ const App = () => {
     message.success('Task updated successfully');
   };
 
-  // Filter tasks based on the selected category
+
   const filteredTasks = tasks.filter((task) => {
     if (selectedCategory === '1') return true; // Show all tasks
     if (selectedCategory === '2') return !task.completed; // Show active tasks
     if (selectedCategory === '3') return task.completed; // Show completed tasks
   });
+
+  const [ii , setii] = useState(null)
+
+  const hc = (date) => {
+    if (date) {
+    setii(date.format('DD-MM-YYYY'))
+    
+    }
+    console.log("ii", ii);
+  }
 
   return (
     <div className="main-div">
@@ -86,9 +96,9 @@ const App = () => {
 
         <Content style={{ padding: '0 48px' }}>
           <Breadcrumb style={{ margin: '16px 0' }}>
-            <Breadcrumb.Item>Home</Breadcrumb.Item>
-            <Breadcrumb.Item>List</Breadcrumb.Item>
-            <Breadcrumb.Item>App</Breadcrumb.Item>
+            <Breadcrumb.Item> Home </Breadcrumb.Item>
+            <Breadcrumb.Item> List </Breadcrumb.Item>
+            <Breadcrumb.Item> App </Breadcrumb.Item>
           </Breadcrumb>
 
           <Row gutter={[16, 16]}>
@@ -177,7 +187,7 @@ const App = () => {
           title="Edit Task"
           visible={modalVisible}
           onCancel={() => setModalVisible(false)}
-          onOk={() => form.submit()} // Trigger form submission on "OK"
+          onOk={() => form.submit()} 
         >
           <Form
             initialValues={editingTask}
@@ -196,7 +206,7 @@ const App = () => {
               <TextArea rows={4} />
             </Form.Item>
             <Form.Item label="Due Date" name="dueDate">
-              <DatePicker style={{ width: '100%' }} />
+              <DatePicker value={ii} onChange={hc} style={{ width: '100%' }} />
             </Form.Item>
           </Form>
         </Modal>
