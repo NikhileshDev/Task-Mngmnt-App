@@ -5,6 +5,7 @@ import { ADD_TASK, REMOVE_TASK, TOGGLE_TASK, EDIT_TASK, SET_CATEGORY } from "./a
 const initialState = {
     tasks: [],
     category: 'ALL',
+
 };
 
 const taskReducer = (state = initialState, action) => {
@@ -39,6 +40,9 @@ const taskReducer = (state = initialState, action) => {
                 ...state,
                 category: action.payload,
             };
+
+        default:
+            return state;
     };
 };
 

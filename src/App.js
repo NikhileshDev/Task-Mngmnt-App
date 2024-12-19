@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { Input, Space, Button, Row, Col, Breadcrumb, Layout, theme, Dropdown, List, Modal, DatePicker, Form, message } from 'antd';
 import { FormOutlined, DownOutlined, DeleteOutlined, CheckCircleOutlined, EditOutlined } from '@ant-design/icons';
+import { useDispatch, useSelector } from 'react-redux';
+import { addTask, removeTask, toggleTaskCompletion, editTask, setCategory } from './Redux/action';
 import './App.css';
 
 const { Header, Content, Footer } = Layout;
@@ -14,80 +16,60 @@ const items = [
 ];
 
 const App = () => {
-  const [tasks, setTasks] = useState([]);
-  const [newTask, setNewTask] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('1');
-  const [editingTask, setEditingTask] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
-
-
+  // Redux state
+  const dispatch = useDispatch();
+  const tasks = useSelector((state) => state.tasks);
+  const selectedCategory = useSelector((state) => state.category);
+  const editingTask = useSelector((state) => state.editingTask);
+  
   const [form] = Form.useForm();
 
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
- 
-  const addTask = () => {
-    // Validate and make sure input is not empty
+  useEffect(() => {
+    // Reset category if needed, for example:
+    dispatch(setCategory('1'));
+  }, [dispatch]);
+
+  const handleAddTask = (newTask) => {
     if (!newTask.trim()) {
       message.error('Please enter a task name!');
       return;
     }
 
-    setTasks([...tasks, { id: Date.now(), text: newTask, completed: false, description: '', dueDate: null }]);
-    setNewTask('');  // Reset the input after adding the task
+    const task = { id: Date.now(), text: newTask, completed: false, description: '', dueDate: null };
+    dispatch(addTask(task));
   };
 
-
-  const toggleTaskCompletion = (id) => {
-    setTasks(tasks.map((task) => task.id === id ? { ...task, completed: !task.completed } : task));
+  const handleToggleTaskCompletion = (id) => {
+    dispatch(toggleTaskCompletion(id));
   };
 
- 
-  const removeTask = (id) => {
-    setTasks(tasks.filter((task) => task.id !== id));
+  const handleRemoveTask = (id) => {
+    dispatch(removeTask(id));
   };
 
- 
   const handleCategoryChange = ({ key }) => {
-    setSelectedCategory(key);
+    dispatch(setCategory(key));
   };
 
-  // Open modal to edit a task
-  const editTask = (task) => {
-    setEditingTask(task);
-    form.setFieldsValue(task); 
-    setModalVisible(true);
+  const handleEditTask = (task) => {
+    dispatch(editTask(task)); // Pass the task to Redux
   };
 
-  
-  const saveEditedTask = (values) => {
-    const updatedTasks = tasks.map((task) =>
-      task.id === editingTask.id ? { ...task, ...values } : task
-    );
-    setTasks(updatedTasks);
-    setModalVisible(false);
-    setEditingTask(null);
+  const handleSaveEditedTask = (values) => {
+    const updatedTask = { ...editingTask, ...values };
+    dispatch(editTask(updatedTask));
     message.success('Task updated successfully');
   };
-
 
   const filteredTasks = tasks.filter((task) => {
     if (selectedCategory === '1') return true; // Show all tasks
     if (selectedCategory === '2') return !task.completed; // Show active tasks
     if (selectedCategory === '3') return task.completed; // Show completed tasks
   });
-
-  const [ii , setii] = useState(null)
-
-  const hc = (date) => {
-    if (date) {
-    setii(date.format('DD-MM-YYYY'))
-    
-    }
-    console.log("ii", ii);
-  }
 
   return (
     <div className="main-div">
@@ -117,12 +99,11 @@ const App = () => {
             <Col span={6}>
               <Space direction="vertical" style={{ width: '100%' }}>
                 <Input
-                  value={newTask}
-                  onChange={(e) => setNewTask(e.target.value)} // Ensure state is updated correctly
+                  onChange={(e) => handleAddTask(e.target.value)}
                   placeholder="Enter Task"
                   size="large"
                 />
-                <Button type="primary" onClick={addTask}>Add Task</Button>
+                <Button type="primary" onClick={handleAddTask}>Add Task</Button>
               </Space>
             </Col>
             <Col span={6}>
@@ -151,15 +132,15 @@ const App = () => {
                     <Button
                       type="link"
                       icon={<CheckCircleOutlined />}
-                      onClick={() => toggleTaskCompletion(task.id)}
+                      onClick={() => handleToggleTaskCompletion(task.id)}
                     >
                       {task.completed ? 'Undo' : 'Complete'}
                     </Button>,
-                    <Button type="link" icon={<EditOutlined />} onClick={() => editTask(task)} />,
+                    <Button type="link" icon={<EditOutlined />} onClick={() => handleEditTask(task)} />,
                     <Button
                       type="link"
                       icon={<DeleteOutlined />}
-                      onClick={() => removeTask(task.id)}
+                      onClick={() => handleRemoveTask(task.id)}
                     >
                       Delete
                     </Button>,
@@ -185,13 +166,13 @@ const App = () => {
       {editingTask && (
         <Modal
           title="Edit Task"
-          visible={modalVisible}
-          onCancel={() => setModalVisible(false)}
-          onOk={() => form.submit()} 
+          visible={editingTask !== null}
+          onCancel={() => dispatch(editTask(null))}
+          onOk={() => form.submit()}
         >
           <Form
             initialValues={editingTask}
-            onFinish={saveEditedTask}
+            onFinish={handleSaveEditedTask}
             layout="vertical"
             form={form}
           >
@@ -206,12 +187,12 @@ const App = () => {
               <TextArea rows={4} />
             </Form.Item>
             <Form.Item label="Due Date" name="dueDate">
-              <DatePicker value={ii} onChange={hc} style={{ width: '100%' }} />
+              <DatePicker style={{ width: '100%' }} />
             </Form.Item>
           </Form>
         </Modal>
       )}
-    </div>
+    </div>  
   );
 };
 
