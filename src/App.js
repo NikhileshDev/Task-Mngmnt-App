@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import { Input, Space, Button, Row, Col, Breadcrumb, Layout, theme, Dropdown, List, Modal, DatePicker, Form, message } from 'antd';
 import { FormOutlined, DownOutlined, DeleteOutlined, CheckCircleOutlined, EditOutlined } from '@ant-design/icons';
-import { useDispatch, useSelector } from 'react-redux';
-import { addTask, removeTask, toggleTaskCompletion, editTask, setCategory } from './Redux/action';
 import './App.css';
+import dayjs from 'dayjs';
+import { useSelector, useDispatch } from 'react-redux';
+import { addTask, removeTask, toggleTaskComplete, editTask } from './Redux/taskSlice';
 
 const { Header, Content, Footer } = Layout;
 const { Search } = Input;
@@ -16,53 +17,66 @@ const items = [
 ];
 
 const App = () => {
-  // Redux state
-  const dispatch = useDispatch();
-  const tasks = useSelector((state) => state.tasks);
-  const selectedCategory = useSelector((state) => state.category);
-  const editingTask = useSelector((state) => state.editingTask);
-  
+
+  const [newTask, setNewTask] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('1');
+  const [editingTask, setEditingTask] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+
   const [form] = Form.useForm();
+  const tasks = useSelector((state) => state.tasks);
+  const dispatch = useDispatch();
 
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  useEffect(() => {
-    // Reset category if needed, for example:
-    dispatch(setCategory('1'));
-  }, [dispatch]);
-
-  const handleAddTask = (newTask) => {
+  // ADD TASK
+  const handleAddTask = () => {
+    // Validate and make sure input is not empty
     if (!newTask.trim()) {
       message.error('Please enter a task name!');
       return;
     }
-
-    const task = { id: Date.now(), text: newTask, completed: false, description: '', dueDate: null };
-    dispatch(addTask(task));
+    dispatch(addTask({ text: newTask, completed: false, description: '', dueDate: null }));
+    setNewTask('');  // Reset the input after adding the task
   };
 
-  const handleToggleTaskCompletion = (id) => {
-    dispatch(toggleTaskCompletion(id));
+  // TOGGLE TASK
+  const toggleTaskCompletion = (id) => {
+    dispatch(toggleTaskComplete(id));
   };
 
+  // REMOVE TASK
   const handleRemoveTask = (id) => {
     dispatch(removeTask(id));
   };
 
+
   const handleCategoryChange = ({ key }) => {
-    dispatch(setCategory(key));
+    setSelectedCategory(key);
   };
 
+  // Open modal to edit a task
   const handleEditTask = (task) => {
-    dispatch(editTask(task)); // Pass the task to Redux
+    setEditingTask(task);
+    form.setFieldsValue({
+      ...task,
+      dueDate: task.dueDate ? dayjs(task.dueDate).startOf('day') : null,  // Ensure valid date
+    });
+    setModalVisible(true);
   };
 
-  const handleSaveEditedTask = (values) => {
-    const updatedTask = { ...editingTask, ...values };
-    dispatch(editTask(updatedTask));
-    message.success('Task updated successfully');
+
+  const saveEditedTask = (values) => {
+
+    const formattedDueDate = values.dueDate && values.dueDate.isValid() ? values.dueDate.startOf('day').format('YYYY-MM-DD') : null;
+
+    dispatch(editTask({ id: editingTask.id, ...values, dueDate: formattedDueDate }));
+    setModalVisible(false);
+    setEditingTask(null);
+    message.success('Task updated successfully.');
   };
 
   const filteredTasks = tasks.filter((task) => {
@@ -71,17 +85,21 @@ const App = () => {
     if (selectedCategory === '3') return task.completed; // Show completed tasks
   });
 
+
   return (
     <div className="main-div">
       <Layout>
-        <Header className="header">Task Management App</Header>
+        <Header className="header"> Task Management App </Header>
 
         <Content style={{ padding: '0 48px' }}>
-          <Breadcrumb style={{ margin: '16px 0' }}>
-            <Breadcrumb.Item> Home </Breadcrumb.Item>
-            <Breadcrumb.Item> List </Breadcrumb.Item>
-            <Breadcrumb.Item> App </Breadcrumb.Item>
-          </Breadcrumb>
+          <Breadcrumb
+            style={{ margin: '16px 0' }}
+            items={[
+              { title: 'Home' },
+              { title: 'List' },
+              { title: 'App' },
+            ]}
+          />
 
           <Row gutter={[16, 16]}>
             <Col span={6}>
@@ -96,16 +114,19 @@ const App = () => {
                 </Button>
               </Dropdown>
             </Col>
-            <Col span={6}>
-              <Space direction="vertical" style={{ width: '100%' }}>
+
+            <Col span={12}>
+              <Space style={{ width: '100%' }}>
                 <Input
-                  onChange={(e) => handleAddTask(e.target.value)}
+                  value={newTask}
+                  onChange={(e) => setNewTask(e.target.value)} // Ensure state is updated correctly
                   placeholder="Enter Task"
                   size="large"
                 />
-                <Button type="primary" onClick={handleAddTask}>Add Task</Button>
+                <Button type="primary" onClick={handleAddTask}> Add Task </Button>
               </Space>
             </Col>
+
             <Col span={6}>
               <Search placeholder="Search tasks" enterButton="Search" size="large" />
             </Col>
@@ -120,9 +141,8 @@ const App = () => {
               marginTop: 10,
             }}
           >
-            <h2>
-              Tasks <FormOutlined />
-            </h2>
+            <h2> Tasks <FormOutlined /> </h2>
+
             <List
               bordered
               dataSource={filteredTasks}
@@ -132,11 +152,13 @@ const App = () => {
                     <Button
                       type="link"
                       icon={<CheckCircleOutlined />}
-                      onClick={() => handleToggleTaskCompletion(task.id)}
+                      onClick={() => toggleTaskCompletion(task.id)}
                     >
                       {task.completed ? 'Undo' : 'Complete'}
                     </Button>,
+
                     <Button type="link" icon={<EditOutlined />} onClick={() => handleEditTask(task)} />,
+
                     <Button
                       type="link"
                       icon={<DeleteOutlined />}
@@ -149,7 +171,13 @@ const App = () => {
                   <div style={{ textDecoration: task.completed ? 'line-through' : 'none' }}>
                     <strong>{task.text}</strong>
                     <p>{task.description}</p>
-                    <p>{task.dueDate ? `Due Date: ${task.dueDate}` : ''}</p>
+
+                    {/* Render Due Date */}
+                    <p>
+                      {task.dueDate && dayjs(task.dueDate).isValid()
+                        ? `Due Date: ${dayjs(task.dueDate).format('DD-MM-YYYY')}`
+                        : 'No Due Date'}
+                    </p>
                   </div>
                 </List.Item>
               )}
@@ -166,13 +194,13 @@ const App = () => {
       {editingTask && (
         <Modal
           title="Edit Task"
-          visible={editingTask !== null}
-          onCancel={() => dispatch(editTask(null))}
-          onOk={() => form.submit()}
+          open={modalVisible}  // use open instead of visible
+          onCancel={() => setModalVisible(false)}
+          onOk={() => form.submit()} // Trigger form submission on "OK"
         >
           <Form
             initialValues={editingTask}
-            onFinish={handleSaveEditedTask}
+            onFinish={saveEditedTask}  // Handle Form Submission
             layout="vertical"
             form={form}
           >
@@ -187,12 +215,20 @@ const App = () => {
               <TextArea rows={4} />
             </Form.Item>
             <Form.Item label="Due Date" name="dueDate">
-              <DatePicker style={{ width: '100%' }} />
+              <DatePicker 
+                style = {{ width: '100%' }} 
+                format = "YYYY-MM-DD"
+                onChange={(date) => {
+                  if(date) {
+                    form.setFieldValue({dueDate: date.startOf('day') });
+                  }
+                }}
+              />
             </Form.Item>
           </Form>
         </Modal>
       )}
-    </div>  
+    </div>
   );
 };
 
