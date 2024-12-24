@@ -24,15 +24,15 @@ const taskSlice = createSlice({
     },
 
     editTask: (state, action) => {
-      const { id, text, description, dueDate } = action.payload;
-      const task = state.find((task) => task.id === id);
-
-      if (task) {
-        task.text = text;
-        task.description = description;
-        task.dueDate = dueDate ? dayjs(dueDate).format("YYYY-MM-DD") : null;
-      }
-    },
+        const { id, text, description, dueDate } = action.payload;
+        const task = state.find((task) => task.id === id);
+      
+        if (task) {
+          task.text = text;
+          task.description = description;
+          task.dueDate = dueDate ? dayjs(dueDate).startOf('day') : null;
+        }
+      },            
   },
 });
 

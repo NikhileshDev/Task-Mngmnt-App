@@ -62,27 +62,34 @@ const App = () => {
   const handleEditTask = (task) => {
     setEditingTask(task);
     form.setFieldsValue({
-      ...task,
-      dueDate: task.dueDate ? dayjs(task.dueDate).startOf('day') : null,  // Ensure valid date
+      text: task.text,
+      description: task.description,
+      dueDate: task.dueDate ? dayjs(task.dueDate).startOf('day') : null,  // Ensure date is handled correctly
     });
     setModalVisible(true);
   };
 
 
   const saveEditedTask = (values) => {
-
     const formattedDueDate = values.dueDate && values.dueDate.isValid() ? values.dueDate.startOf('day').format('YYYY-MM-DD') : null;
-
-    dispatch(editTask({ id: editingTask.id, ...values, dueDate: formattedDueDate }));
+  
+    dispatch(editTask({ 
+      id: editingTask.id, 
+      text: values.text, 
+      description: values.description, 
+      dueDate: formattedDueDate
+    }));
+    
     setModalVisible(false);
     setEditingTask(null);
     message.success('Task updated successfully.');
   };
-
+  
   const filteredTasks = tasks.filter((task) => {
     if (selectedCategory === '1') return true; // Show all tasks
     if (selectedCategory === '2') return !task.completed; // Show active tasks
     if (selectedCategory === '3') return task.completed; // Show completed tasks
+    return;
   });
 
 
@@ -200,7 +207,7 @@ const App = () => {
         >
           <Form
             initialValues={editingTask}
-            onFinish={saveEditedTask}  // Handle Form Submission
+            onFinish={saveEditedTask} 
             layout="vertical"
             form={form}
           >
@@ -211,16 +218,21 @@ const App = () => {
             >
               <Input />
             </Form.Item>
+
             <Form.Item label="Description" name="description">
               <TextArea rows={4} />
             </Form.Item>
+
             <Form.Item label="Due Date" name="dueDate">
-              <DatePicker 
-                style = {{ width: '100%' }} 
-                format = "YYYY-MM-DD"
+              <DatePicker
+                style={{ width: '100%' }}
+                format="YYYY-MM-DD"
+                value={editingTask?.dueDate ? dayjs(editingTask.dueDate) : null}  // Ensure correct value is passed to the DatePicker
                 onChange={(date) => {
-                  if(date) {
-                    form.setFieldValue({dueDate: date.startOf('day') });
+                  if (date) {
+                    form.setFieldValue('dueDate', date.startOf('day'));
+                  } else {
+                    form.setFieldValue('dueDate', null);
                   }
                 }}
               />

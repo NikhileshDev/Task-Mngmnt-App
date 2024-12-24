@@ -1,21 +1,24 @@
 import { configureStore } from "@reduxjs/toolkit";
-import taskReducer from './taskSlice';
 import { persistStore, persistReducer } from "redux-persist";
-import storage from "redux-persist/lib/storage";
+import storage from "redux-persist/lib/storage"; // Use localStorage/sessionStorage for persistence
+import taskReducer from './taskSlice';
+import { combineReducers } from 'redux';
 
 const persistConfig = {
-    key: 'root',
-    storage,
+  key: 'root',
+  storage,
 };
 
-const persistedReducer = persistReducer(persistConfig, taskReducer);
+const rootReducer = combineReducers({
+  tasks: taskReducer,
+});
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 const store = configureStore({
-    reducer: {
-        tasks: persistedReducer,
-    },
+  reducer: persistedReducer,
 });
 
 const persistor = persistStore(store);
 
-export {store, persistor};
+export { store, persistor };
