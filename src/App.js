@@ -22,6 +22,7 @@ const App = () => {
   const [selectedCategory, setSelectedCategory] = useState('1');
   const [editingTask, setEditingTask] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
 
   const [form] = Form.useForm();
@@ -86,11 +87,19 @@ const App = () => {
   };
   
   const filteredTasks = tasks.filter((task) => {
-    if (selectedCategory === '1') return true; // Show all tasks
-    if (selectedCategory === '2') return !task.completed; // Show active tasks
-    if (selectedCategory === '3') return task.completed; // Show completed tasks
-    return;
-  });
+
+    // Filter based on status
+    const matchesCategory = 
+    selectedCategory === '1' ||  // Show all tasks
+    (selectedCategory === '2' && !task.completed) || // Show active tasks
+    (selectedCategory === '3' && task.completed); // Show completed tasks
+
+    // Filter based on search query
+    const matchesSearch = task.text.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          task.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return matchesCategory && matchesSearch;
+  }); 
 
 
   return (
@@ -135,7 +144,14 @@ const App = () => {
             </Col>
 
             <Col span={6}>
-              <Search placeholder="Search tasks" enterButton="Search" size="large" />
+              <Search 
+                placeholder="Search tasks"  
+                enterButton="Search" 
+                size="large" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onSearch={() => {}}
+              />
             </Col>
           </Row>
 
@@ -207,7 +223,7 @@ const App = () => {
         >
           <Form
             initialValues={editingTask}
-            onFinish={saveEditedTask} 
+            onFinish={saveEditedTask}  // Handle Form Submission
             layout="vertical"
             form={form}
           >
